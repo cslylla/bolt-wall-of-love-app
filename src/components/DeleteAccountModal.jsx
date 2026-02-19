@@ -4,7 +4,7 @@ export default function DeleteAccountModal({ isOpen, onClose, onConfirm }) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backgroundColor: 'rgba(17, 17, 20, 0.95)' }}>
       <div className="bg-[#1a1a1f] border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl">
         <h2 className="text-2xl font-bold text-white mb-4">Delete Account</h2>
         <p className="text-gray-300 mb-6">
