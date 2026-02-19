@@ -2,17 +2,20 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
-let supabase: any;
+let supabaseAdmin: any;
+let supabaseAuth: any;
 let stripe: any;
 
 try {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
 
   console.log('Environment check:', {
     hasSupabaseUrl: !!supabaseUrl,
     hasServiceRoleKey: !!supabaseServiceRoleKey,
+    hasAnonKey: !!supabaseAnonKey,
     hasStripeSecret: !!stripeSecret,
     supabaseUrl: supabaseUrl
   });
@@ -21,13 +24,20 @@ try {
     throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
   }
 
+  if (!supabaseAnonKey) {
+    throw new Error('Missing SUPABASE_ANON_KEY');
+  }
+
   if (!stripeSecret) {
     throw new Error('Missing STRIPE_SECRET_KEY');
   }
 
-  console.log('Creating Supabase client...');
-  supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-  console.log('Supabase client created successfully');
+  console.log('Creating Supabase clients...');
+  // Client with service role key for database operations
+  supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+  // Client with anon key for auth verification
+  supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+  console.log('Supabase clients created successfully');
 
   console.log('Creating Stripe client...');
   stripe = new Stripe(stripeSecret, {
@@ -113,7 +123,7 @@ Deno.serve(async (req) => {
     const {
       data: { user },
       error: getUserError,
-    } = await supabase.auth.getUser(token);
+    } = await supabaseAuth.auth.getUser(token);
 
     console.log('Auth result:', {
       hasUser: !!user,
@@ -130,7 +140,7 @@ Deno.serve(async (req) => {
       return corsResponse({ error: 'User not found' }, 404);
     }
 
-    const { data: customer, error: getCustomerError } = await supabase
+    const { data: customer, error: getCustomerError } = await supabaseAdmin
       .from('stripe_customers')
       .select('customer_id')
       .eq('user_id', user.id)
@@ -158,7 +168,7 @@ Deno.serve(async (req) => {
 
       console.log(`Created new Stripe customer ${newCustomer.id} for user ${user.id}`);
 
-      const { error: createCustomerError } = await supabase.from('stripe_customers').insert({
+      const { error: createCustomerError } = await supabaseAdmin.from('stripe_customers').insert({
         user_id: user.id,
         customer_id: newCustomer.id,
       });
@@ -169,7 +179,7 @@ Deno.serve(async (req) => {
         // Try to clean up both the Stripe customer and subscription record
         try {
           await stripe.customers.del(newCustomer.id);
-          await supabase.from('stripe_subscriptions').delete().eq('customer_id', newCustomer.id);
+          await supabaseAdmin.from('stripe_subscriptions').delete().eq('customer_id', newCustomer.id);
         } catch (deleteError) {
           console.error('Failed to clean up after customer mapping error:', deleteError);
         }
@@ -178,7 +188,7 @@ Deno.serve(async (req) => {
       }
 
       if (mode === 'subscription') {
-        const { error: createSubscriptionError } = await supabase.from('stripe_subscriptions').insert({
+        const { error: createSubscriptionError } = await supabaseAdmin.from('stripe_subscriptions').insert({
           customer_id: newCustomer.id,
           status: 'not_started',
         });
@@ -205,7 +215,7 @@ Deno.serve(async (req) => {
 
       if (mode === 'subscription') {
         // Verify subscription exists for existing customer
-        const { data: subscription, error: getSubscriptionError } = await supabase
+        const { data: subscription, error: getSubscriptionError } = await supabaseAdmin
           .from('stripe_subscriptions')
           .select('status')
           .eq('customer_id', customerId)
@@ -219,7 +229,7 @@ Deno.serve(async (req) => {
 
         if (!subscription) {
           // Create subscription record for existing customer if missing
-          const { error: createSubscriptionError } = await supabase.from('stripe_subscriptions').insert({
+          const { error: createSubscriptionError } = await supabaseAdmin.from('stripe_subscriptions').insert({
             customer_id: customerId,
             status: 'not_started',
           });
