@@ -6,12 +6,21 @@ export async function createStripeCheckout(projectId, projectTitle) {
   try {
     const { data: { session } } = await supabase.auth.getSession()
 
+    console.log('Session data:', session)
+    console.log('Access token:', session?.access_token)
+
     if (!session) {
       throw new Error('You must be logged in to support a project')
     }
 
+    if (!session.access_token) {
+      throw new Error('No access token found in session')
+    }
+
     const successUrl = `${window.location.origin}/wall?success=true&project=${encodeURIComponent(projectTitle)}`
     const cancelUrl = `${window.location.origin}/wall`
+
+    console.log('Making request with Authorization:', `Bearer ${session.access_token.substring(0, 20)}...`)
 
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`,
@@ -32,7 +41,10 @@ export async function createStripeCheckout(projectId, projectTitle) {
     )
 
     if (!response.ok) {
+      console.error('Response status:', response.status)
+      console.error('Response headers:', response.headers)
       const error = await response.json()
+      console.error('Error response:', error)
       throw new Error(error.error || 'Failed to create checkout session')
     }
 
