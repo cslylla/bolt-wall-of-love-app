@@ -5,7 +5,7 @@ import Button from '../components/Button'
 import FlipCard from '../components/FlipCard'
 import FAQItem from '../components/FAQItem'
 
-export default function Landing() {
+export default function Landing({ onOpenDeleteAccount }) {
   const features = [
     {
       front: 'Community',
@@ -50,7 +50,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar onOpenDeleteAccount={onOpenDeleteAccount} />
 
       <main className="flex-1 pt-16">
         <section

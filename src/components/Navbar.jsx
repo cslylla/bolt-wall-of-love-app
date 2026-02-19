@@ -2,12 +2,10 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Button from './Button'
-import DeleteAccountModal from './DeleteAccountModal'
 
-export default function Navbar() {
+export default function Navbar({ onOpenDeleteAccount }) {
   const [user, setUser] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
-  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -31,44 +29,11 @@ export default function Navbar() {
     navigate('/')
   }
 
-  const handleDeleteAccount = async () => {
-    try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser()
-
-      if (!currentUser) {
-        console.error('No user found')
-        return
-      }
-
-      const { error: deleteProjectsError } = await supabase
-        .from('projects')
-        .delete()
-        .eq('user_id', currentUser.id)
-
-      if (deleteProjectsError) {
-        console.error('Error deleting projects:', deleteProjectsError)
-        return
-      }
-
-      const { error: deleteUserError } = await supabase.rpc('delete_user')
-
-      if (deleteUserError) {
-        console.error('Error deleting user:', deleteUserError)
-        return
-      }
-
-      await supabase.auth.signOut()
-      setIsDeleteAccountModalOpen(false)
-      setShowDropdown(false)
-      navigate('/')
-    } catch (error) {
-      console.error('Error during account deletion:', error)
-    }
-  }
-
   const openDeleteAccountModal = () => {
     setShowDropdown(false)
-    setIsDeleteAccountModalOpen(true)
+    if (onOpenDeleteAccount) {
+      onOpenDeleteAccount()
+    }
   }
 
   const getInitials = (email) => {
@@ -129,12 +94,6 @@ export default function Navbar() {
           )}
         </div>
       </div>
-
-      <DeleteAccountModal
-        isOpen={isDeleteAccountModalOpen}
-        onClose={() => setIsDeleteAccountModalOpen(false)}
-        onConfirm={handleDeleteAccount}
-      />
     </nav>
   )
 }

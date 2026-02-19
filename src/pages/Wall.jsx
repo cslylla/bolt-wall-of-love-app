@@ -9,7 +9,7 @@ import EditProjectModal from '../components/EditProjectModal'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
 import { supabase } from '../lib/supabase'
 
-export default function Wall() {
+export default function Wall({ onOpenDeleteAccount }) {
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [projects, setProjects] = useState([])
@@ -123,7 +123,7 @@ export default function Wall() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <Navbar onOpenDeleteAccount={onOpenDeleteAccount} />
         <main className="flex-1 pt-16 px-6 py-20 flex items-center justify-center">
           <div className="text-white text-xl">Loading...</div>
         </main>
@@ -134,7 +134,7 @@ export default function Wall() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <Navbar onOpenDeleteAccount={onOpenDeleteAccount} />
 
       <main className="flex-1 pt-24 px-6 py-12">
         <div className="max-w-7xl mx-auto">
