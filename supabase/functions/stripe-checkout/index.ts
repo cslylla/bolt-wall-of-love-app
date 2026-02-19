@@ -2,8 +2,26 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
-const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
-const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY')!;
+const supabaseUrl = Deno.env.get('SUPABASE_URL');
+const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
+
+console.log('Environment check:', {
+  hasSupabaseUrl: !!supabaseUrl,
+  hasServiceRoleKey: !!supabaseServiceRoleKey,
+  hasStripeSecret: !!stripeSecret,
+  supabaseUrl: supabaseUrl
+});
+
+if (!supabaseUrl || !supabaseServiceRoleKey) {
+  throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+}
+
+if (!stripeSecret) {
+  throw new Error('Missing STRIPE_SECRET_KEY');
+}
+
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 const stripe = new Stripe(stripeSecret, {
   appInfo: {
     name: 'Bolt Integration',
@@ -59,15 +77,32 @@ Deno.serve(async (req) => {
       return corsResponse({ error }, 400);
     }
 
-    const authHeader = req.headers.get('Authorization')!;
+    const authHeader = req.headers.get('Authorization');
+
+    console.log('Auth header received:', authHeader ? `Bearer ${authHeader.substring(7, 27)}...` : 'null');
+
+    if (!authHeader) {
+      return corsResponse({ error: 'Missing Authorization header' }, 401);
+    }
+
     const token = authHeader.replace('Bearer ', '');
+
+    console.log('Attempting to verify user with token...');
+
     const {
       data: { user },
       error: getUserError,
     } = await supabase.auth.getUser(token);
 
+    console.log('Auth result:', {
+      hasUser: !!user,
+      userId: user?.id,
+      error: getUserError?.message
+    });
+
     if (getUserError) {
-      return corsResponse({ error: 'Failed to authenticate user' }, 401);
+      console.error('Auth error:', getUserError);
+      return corsResponse({ error: 'Failed to authenticate user', details: getUserError.message }, 401);
     }
 
     if (!user) {
