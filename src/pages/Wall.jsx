@@ -49,12 +49,19 @@ export default function Wall({ onOpenDeleteAccount }) {
   }, [searchParams, setSearchParams])
 
   const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        navigate('/auth')
+        return
+      }
+
+      setUser(session.user)
+    } catch (error) {
+      console.error('Auth check error:', error)
       navigate('/auth')
-      return
     }
-    setUser(user)
   }
 
   const loadProjects = async () => {
