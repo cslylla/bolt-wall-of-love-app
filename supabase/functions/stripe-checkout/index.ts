@@ -2,32 +2,45 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL');
-const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
+let supabase: any;
+let stripe: any;
 
-console.log('Environment check:', {
-  hasSupabaseUrl: !!supabaseUrl,
-  hasServiceRoleKey: !!supabaseServiceRoleKey,
-  hasStripeSecret: !!stripeSecret,
-  supabaseUrl: supabaseUrl
-});
+try {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY');
 
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+  console.log('Environment check:', {
+    hasSupabaseUrl: !!supabaseUrl,
+    hasServiceRoleKey: !!supabaseServiceRoleKey,
+    hasStripeSecret: !!stripeSecret,
+    supabaseUrl: supabaseUrl
+  });
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+  }
+
+  if (!stripeSecret) {
+    throw new Error('Missing STRIPE_SECRET_KEY');
+  }
+
+  console.log('Creating Supabase client...');
+  supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+  console.log('Supabase client created successfully');
+
+  console.log('Creating Stripe client...');
+  stripe = new Stripe(stripeSecret, {
+    appInfo: {
+      name: 'Bolt Integration',
+      version: '1.0.0',
+    },
+  });
+  console.log('Stripe client created successfully');
+} catch (error: any) {
+  console.error('Fatal error during initialization:', error.message, error.stack);
+  throw error;
 }
-
-if (!stripeSecret) {
-  throw new Error('Missing STRIPE_SECRET_KEY');
-}
-
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-const stripe = new Stripe(stripeSecret, {
-  appInfo: {
-    name: 'Bolt Integration',
-    version: '1.0.0',
-  },
-});
 
 // Helper function to create responses with CORS headers
 function corsResponse(body: string | object | null, status = 200) {
