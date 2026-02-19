@@ -47,7 +47,7 @@ function corsResponse(body: string | object | null, status = 200) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   };
 
   // For 204 No Content, don't include Content-Type or body
