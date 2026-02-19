@@ -13,7 +13,8 @@ Wall of Love is a community showcase app, it lets Bolt.new creators share projec
 - 🗑️ Delete account with full data cleanup
 - 📱 Responsive card grid with hover effects
 - 🛡️ Protected routes — wall only accessible to logged-in users
-- 🎯 Bolt.new-inspired dark design (#111114, #46A1FD)
+- 🎯 Bolt.new-inspired dark design (#111114, #46A1FD
+- ⚡ Support creators with a one-time payment via Stripe
 
 ## Live App
 
@@ -31,7 +32,7 @@ https://cslylla-bolt-wall-of-70aa.bolt.host
 ## Tech Stack
 
 - **Frontend:** React, Tailwind CSS
-- **Backend/Database:** Supabase (PostgreSQL)
+- **Backend/Database:** Supabase (PostgreSQL), Stripe (one-time payments via Supabase edge functions)
 - **Auth:** Supabase Auth (email/password)
 - **Hosting:** Bolt.new built-in hosting
 
@@ -45,7 +46,9 @@ https://cslylla-bolt-wall-of-70aa.bolt.host
 
 ## Known Limitations
 
-Password reset email redirects to localhost in the current setup. This is a Supabase Site URL configuration issue that requires dashboard access to the Bolt-managed database to fix.
+- Password reset emails redirect to localhost when testing from the local Bolt preview. This works correctly on the published URL after setting the Site URL in Supabase Authentication settings.
+- The Stripe Support button is only visible on other users' cards, not your own.
+- Stripe integration requires JWT verification to be disabled on the stripe-checkout edge function — this is a known Supabase edge runtime behavior where the Authorization header is stripped after JWT verification before reaching the function handler.
 
 ## Project Context
 
