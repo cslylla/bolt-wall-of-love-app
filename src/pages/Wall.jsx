@@ -60,10 +60,7 @@ export default function Wall() {
       return
     }
 
-    const authorName = userData.user.user_metadata?.full_name ||
-                       userData.user.user_metadata?.name ||
-                       userData.user.email?.split('@')[0] ||
-                       'Anonymous'
+    const authorName = userData.user.user_metadata?.full_name || 'Anonymous'
 
     const { error } = await supabase
       .from('projects')
@@ -210,12 +207,7 @@ export default function Wall() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleAddProject}
-        authorName={
-          user?.user_metadata?.full_name ||
-          user?.user_metadata?.name ||
-          user?.email?.split('@')[0] ||
-          'Anonymous'
-        }
+        authorName={user?.user_metadata?.full_name || 'Anonymous'}
       />
 
       <EditProjectModal
