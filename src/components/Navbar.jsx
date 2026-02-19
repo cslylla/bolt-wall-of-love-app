@@ -2,10 +2,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Button from './Button'
+import DeleteAccountModal from './DeleteAccountModal'
 
 export default function Navbar() {
   const [user, setUser] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
+  const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -27,6 +29,46 @@ export default function Navbar() {
     await supabase.auth.signOut()
     setShowDropdown(false)
     navigate('/')
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+
+      if (!currentUser) {
+        console.error('No user found')
+        return
+      }
+
+      const { error: deleteProjectsError } = await supabase
+        .from('projects')
+        .delete()
+        .eq('user_id', currentUser.id)
+
+      if (deleteProjectsError) {
+        console.error('Error deleting projects:', deleteProjectsError)
+        return
+      }
+
+      const { error: deleteUserError } = await supabase.rpc('delete_user')
+
+      if (deleteUserError) {
+        console.error('Error deleting user:', deleteUserError)
+        return
+      }
+
+      await supabase.auth.signOut()
+      setIsDeleteAccountModalOpen(false)
+      setShowDropdown(false)
+      navigate('/')
+    } catch (error) {
+      console.error('Error during account deletion:', error)
+    }
+  }
+
+  const openDeleteAccountModal = () => {
+    setShowDropdown(false)
+    setIsDeleteAccountModalOpen(true)
   }
 
   const getInitials = (email) => {
@@ -60,6 +102,12 @@ export default function Navbar() {
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1f] border border-white/10 rounded-lg shadow-xl overflow-hidden">
                     <button
+                      onClick={openDeleteAccountModal}
+                      className="w-full px-4 py-3 text-left text-red-400 hover:bg-white/5 transition-colors"
+                    >
+                      Delete account
+                    </button>
+                    <button
                       onClick={handleLogout}
                       className="w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
                     >
@@ -81,6 +129,12 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      <DeleteAccountModal
+        isOpen={isDeleteAccountModalOpen}
+        onClose={() => setIsDeleteAccountModalOpen(false)}
+        onConfirm={handleDeleteAccount}
+      />
     </nav>
   )
 }
