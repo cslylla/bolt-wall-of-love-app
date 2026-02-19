@@ -53,8 +53,9 @@ export default function Landing() {
       <Navbar />
 
       <main className="flex-1 pt-16">
-        <section className="py-20 px-6">
-          <div className="max-w-5xl mx-auto text-center">
+        <section className="py-20 px-6 relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/hero.png)' }}>
+          <div className="absolute inset-0 bg-gradient-to-b from-bolt-bg/80 via-bolt-bg/60 to-bolt-bg"></div>
+          <div className="max-w-5xl mx-auto text-center relative z-10">
             <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
               Build it. Share it. Get inspired.
             </h1>
