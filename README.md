@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Wall of Love is a community showcase app built as part of a Customer Experience Engineer assessment at Bolt.new. It lets Bolt.new creators share projects they've built, discover what others have made, and get inspired. Built entirely with Bolt.new.
+Wall of Love is a community showcase app, it lets Bolt.new creators share projects they've built, discover what others have made, and get inspired. Built entirely with Bolt.new.
 
 ## Key Features
 
@@ -49,4 +49,4 @@ Password reset email redirects to localhost in the current setup. This is a Supa
 
 ## Project Context
 
-Built as part of a Customer Experience Engineer take-home assessment at Bolt.new, with a focus on experimenting with the product, understanding the user experience, and shipping a working app end to end.
+Built as part of an assessment at Bolt.new, with a focus on experimenting with the product, understanding the user experience, and shipping a working app end to end.
