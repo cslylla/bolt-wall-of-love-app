@@ -54,23 +54,33 @@ export default function Landing() {
 
       <main className="flex-1 pt-16">
         <section className="py-20 px-6 relative overflow-hidden" style={{ backgroundColor: '#111114' }}>
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div
               className="absolute"
               style={{
-                width: '600px',
-                height: '600px',
+                width: '800px',
+                height: '800px',
                 borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(70, 161, 253, 0.4) 0%, rgba(70, 161, 253, 0.2) 25%, rgba(70, 161, 253, 0.1) 50%, transparent 70%)',
-                filter: 'blur(60px)',
+                background: 'radial-gradient(circle, rgba(70, 161, 253, 0.35) 0%, rgba(70, 161, 253, 0.2) 20%, rgba(70, 161, 253, 0.12) 40%, rgba(70, 161, 253, 0.06) 60%, rgba(70, 161, 253, 0.02) 80%, transparent 100%)',
+                filter: 'blur(80px)',
+              }}
+            ></div>
+            <div
+              className="absolute"
+              style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 0 20px 4px rgba(255, 255, 255, 0.8), 0 0 40px 8px rgba(70, 161, 253, 0.6)',
               }}
             ></div>
           </div>
           <div className="max-w-5xl mx-auto text-center relative z-10">
-            <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-6xl font-bold text-white mb-12 leading-tight">
               Build it. Share it. Get inspired.
             </h1>
-            <p className="text-2xl text-gray-400 mb-10 leading-relaxed">
+            <p className="text-2xl text-gray-400 mb-10 leading-relaxed mt-12">
               A community wall for Bolt.new creators — share what you've built and discover what's possible.
             </p>
             <Link to="/auth?mode=signup">
