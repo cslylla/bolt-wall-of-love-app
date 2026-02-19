@@ -53,8 +53,19 @@ export default function Landing() {
       <Navbar />
 
       <main className="flex-1 pt-16">
-        <section className="py-20 px-6 relative bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/hero.png)' }}>
-          <div className="absolute inset-0 bg-gradient-to-b from-bolt-bg/80 via-bolt-bg/60 to-bolt-bg"></div>
+        <section className="py-20 px-6 relative overflow-hidden" style={{ backgroundColor: '#111114' }}>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div
+              className="absolute"
+              style={{
+                width: '600px',
+                height: '600px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(70, 161, 253, 0.4) 0%, rgba(70, 161, 253, 0.2) 25%, rgba(70, 161, 253, 0.1) 50%, transparent 70%)',
+                filter: 'blur(60px)',
+              }}
+            ></div>
+          </div>
           <div className="max-w-5xl mx-auto text-center relative z-10">
             <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
               Build it. Share it. Get inspired.
