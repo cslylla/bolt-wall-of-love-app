@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import Button from './Button'
@@ -7,6 +7,7 @@ export default function Navbar() {
   const [user, setUser] = useState(null)
   const [showDropdown, setShowDropdown] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -42,25 +43,32 @@ export default function Navbar() {
 
         <div className="flex items-center gap-4">
           {user ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowDropdown(!showDropdown)}
-                className="w-10 h-10 rounded-full bg-bolt-blue text-white font-medium flex items-center justify-center hover:bg-opacity-90 transition-all"
-              >
-                {getInitials(user.email)}
-              </button>
-
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1f] border border-white/10 rounded-lg shadow-xl overflow-hidden">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
+            <>
+              {location.pathname === '/' && (
+                <Link to="/wall">
+                  <Button variant="primary">Go to Wall</Button>
+                </Link>
               )}
-            </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="w-10 h-10 rounded-full bg-bolt-blue text-white font-medium flex items-center justify-center hover:bg-opacity-90 transition-all"
+                >
+                  {getInitials(user.email)}
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1f] border border-white/10 rounded-lg shadow-xl overflow-hidden">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-3 text-left text-white hover:bg-white/5 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <>
               <Link to="/auth?mode=signin">
