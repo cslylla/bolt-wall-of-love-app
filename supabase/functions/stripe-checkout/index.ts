@@ -65,14 +65,22 @@ function corsResponse(body: string | object | null, status = 200) {
 }
 
 Deno.serve(async (req) => {
+  console.log('=== REQUEST RECEIVED ===');
+  console.log('Request method:', req.method);
+  console.log('Authorization header:', req.headers.get('Authorization') ? 'Present' : 'Missing');
+
   try {
     if (req.method === 'OPTIONS') {
+      console.log('Handling OPTIONS request');
       return corsResponse({}, 204);
     }
 
     if (req.method !== 'POST') {
+      console.log('Invalid method, returning 405');
       return corsResponse({ error: 'Method not allowed' }, 405);
     }
+
+    console.log('Processing POST request...');
 
     const { price_id, success_url, cancel_url, mode } = await req.json();
 
