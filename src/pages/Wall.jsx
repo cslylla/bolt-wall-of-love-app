@@ -44,7 +44,7 @@ export default function Wall({ onOpenDeleteAccount }) {
 
       setTimeout(() => {
         setSuccessMessage(null)
-      }, 5000)
+      }, 3000)
     }
   }, [searchParams, setSearchParams])
 
