@@ -1,4 +1,4 @@
-export default function ProjectCard({ project, currentUserId, onEdit, onDelete }) {
+export default function ProjectCard({ project, currentUserId, onEdit, onDelete, onSupport, isSupporting }) {
   const isOwner = project.user_id === currentUserId
 
   const formatDate = (dateString) => {
@@ -102,10 +102,15 @@ export default function ProjectCard({ project, currentUserId, onEdit, onDelete }
             {formatDate(project.created_at)}
           </span>
           <button
-            disabled
-            className="bg-gray-700 text-gray-500 px-4 py-2 rounded text-sm cursor-not-allowed"
+            onClick={() => onSupport(project)}
+            disabled={isSupporting}
+            className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
+              isSupporting
+                ? 'bg-gray-700 text-gray-500 cursor-wait'
+                : 'bg-bolt-blue text-white hover:bg-bolt-blue-light hover:shadow-[0_0_10px_rgba(59,130,246,0.5)]'
+            }`}
           >
-            Support ⚡
+            {isSupporting ? 'Processing...' : 'Support ⚡'}
           </button>
         </div>
       </div>

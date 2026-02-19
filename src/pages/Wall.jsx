@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import Button from '../components/Button'
@@ -8,9 +8,11 @@ import AddProjectModal from '../components/AddProjectModal'
 import EditProjectModal from '../components/EditProjectModal'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
 import { supabase } from '../lib/supabase'
+import { createStripeCheckout } from '../lib/stripe'
 
 export default function Wall({ onOpenDeleteAccount }) {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [user, setUser] = useState(null)
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,6 +20,8 @@ export default function Wall({ onOpenDeleteAccount }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
+  const [supportingProjectId, setSupportingProjectId] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
 
   useEffect(() => {
     checkAuth()
@@ -28,6 +32,21 @@ export default function Wall({ onOpenDeleteAccount }) {
       loadProjects()
     }
   }, [user])
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const projectTitle = searchParams.get('project')
+
+    if (success === 'true' && projectTitle) {
+      setSuccessMessage(`Thank you for supporting "${decodeURIComponent(projectTitle)}"!`)
+
+      setSearchParams({})
+
+      setTimeout(() => {
+        setSuccessMessage(null)
+      }, 5000)
+    }
+  }, [searchParams, setSearchParams])
 
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -120,6 +139,20 @@ export default function Wall({ onOpenDeleteAccount }) {
     setIsDeleteModalOpen(true)
   }
 
+  const handleSupportProject = async (project) => {
+    try {
+      setSupportingProjectId(project.id)
+
+      const checkoutUrl = await createStripeCheckout(project.id, project.title)
+
+      window.location.href = checkoutUrl
+    } catch (error) {
+      console.error('Failed to create checkout:', error)
+      alert(error.message || 'Failed to create checkout session. Please try again.')
+      setSupportingProjectId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -138,6 +171,12 @@ export default function Wall({ onOpenDeleteAccount }) {
 
       <main className="flex-1 pt-24 px-6 py-12">
         <div className="max-w-7xl mx-auto">
+          {successMessage && (
+            <div className="mb-6 bg-green-500/10 border border-green-500/50 rounded-lg px-6 py-4 text-green-400 text-center animate-fade-in">
+              {successMessage}
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-12">
             <div>
               <h1 className="text-5xl font-bold text-white mb-4">
@@ -194,6 +233,8 @@ export default function Wall({ onOpenDeleteAccount }) {
                   currentUserId={user?.id}
                   onEdit={openEditModal}
                   onDelete={openDeleteModal}
+                  onSupport={handleSupportProject}
+                  isSupporting={supportingProjectId === project.id}
                 />
               ))}
             </div>
