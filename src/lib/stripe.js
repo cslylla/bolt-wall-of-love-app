@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-const STRIPE_PRICE_ID = 'price_1QpE5pP8JbkzQo2aJoVdg7ym'
+const STRIPE_PRICE_ID = 'price_1T2ZPWCt383Sb9BmCT21qzLv'
 
 export async function createStripeCheckout(projectId, projectTitle) {
   try {
